@@ -42,6 +42,7 @@ async function cacheFirst(request) {
             //
             // Request is satsified from the cache.
             //
+            console.log(`Requuest satisfied from cache: HTTP ${request.method} ${request.url}`);
             return responseFromCache;
         }
     
