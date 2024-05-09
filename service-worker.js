@@ -108,29 +108,29 @@ async function cacheFirst(request) {
             headers: { "Content-Type": "text/plain" },
         });
     }
-};
+}
 
 //
 // The types of assets that can be cached.
 //
-const cachableContentTypes = [
-    "text/html",
-    "text/css",
-    "application/javascript",
+const cachableDestinations = [
+    "document",
+    "script",
+    "style",
 ];
 
 //
-// Checks if the content type is cacheable.
+// Checks if the destination type is cacheable.
 //
-function isCacheable(contentType) {
-    for (const cachableContentType of cachableContentTypes) {
-        if (contentType.includes(cachableContentType)) {
-            console.log(`## Cacheable content type: ${contentType}`);
+function isCacheable(destination) {
+    for (const cachableDestination of cachableDestinations) {
+        if (destination === cachableDestination) {
+            console.log(`## Cacheable destination: ${destination}`);
             return true;
         }
     }
 
-    console.log(`## Not cacheable content type: ${contentType}`);
+    console.log(`## Not cacheable destination: ${destination}`);
     return false;
 }
 
@@ -155,8 +155,7 @@ async function networkFirst(request) {
         // }
 
         if (request.url.startsWith("http://") || request.url.startsWith("https://")) {
-            const contentType = responseFromNetwork.headers.get("Content-Type");
-            if (contentType && isCacheable(contentType)) {
+            if (isCacheable(request.destination)) {
                 //
                 // Cache the response.
                 //
@@ -169,7 +168,7 @@ async function networkFirst(request) {
                     });
             }
             else {
-                console.log(`!! Not caching request with response type ${contentType}`);
+                console.log(`!! Not caching request with destination ${request.destination}`);
             }
         }
 
