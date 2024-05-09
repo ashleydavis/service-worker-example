@@ -107,7 +107,8 @@ async function networkFirst(request) {
         console.log(`>> HTTP ${request.method} ${request.url} from network.`);
         const responseFromNetwork = await fetch(request);
 
-        if (request.scheme === "http" || request.scheme === "https") {
+        if (request.url.startsWith("http://") || request.url.startsWith("https://")) {
+
             //
             // Cache the response.
             //
