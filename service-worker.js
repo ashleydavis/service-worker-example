@@ -23,6 +23,16 @@ self.addEventListener("fetch", event => {
 });
 
 //
+// Puts a response in the cache.
+//
+async function cacheResponse(request, response) {
+    const cache = await caches.open("v1");
+    await cache.put(request, response);
+
+    console.error(`Cached response for HTTP ${request.method} ${request.url}`);
+};
+
+//
 // Fetch using a cache-first strategy.
 //
 async function cacheFirst(request) {
@@ -31,7 +41,6 @@ async function cacheFirst(request) {
         //
         // Request is satsified from the cache.
         //
-        console.log(`>> HTTP ${request.method} ${request.url} from cache.`);
         return responseFromCache;
     }
 
@@ -39,7 +48,17 @@ async function cacheFirst(request) {
     // Request is not in the cache. Fetch it from the network.
     //
     console.log(`>> HTTP ${request.method} ${request.url} from network.`);
-    return fetch(request);
+    const responseFromNetwork = await fetch(request);
+
+    //
+    // Cache the response.
+    //
+    cacheResponse(request, responseFromNetwork.clone())
+        .catch(err => {
+            console.error(`Failed to cache response for HTTP ${request.method} ${request.url}`);
+            console.error(err);
+        });
+    return responseFromNetwork;
 };
 
 //
