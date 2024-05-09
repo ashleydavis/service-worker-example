@@ -50,17 +50,20 @@ async function cacheFirst(request) {
         //
         console.log(`>> HTTP ${request.method} ${request.url} from network.`);
         const responseFromNetwork = await fetch(request);
-    
-        //
-        // Cache the response.
-        //
-        // Cloning the response is necessary because request and response streams can only be read once.
-        //
-        cacheResponse(request, responseFromNetwork.clone())
-            .catch(err => {
-                console.error(`Failed to cache response for HTTP ${request.method} ${request.url}`);
-                console.error(err);
-            });
+
+        if (request.scheme === "http" || request.scheme === "https") {    
+            //
+            // Cache the response.
+            //
+            // Cloning the response is necessary because request and response streams can only be read once.
+            //
+            cacheResponse(request, responseFromNetwork.clone())
+                .catch(err => {
+                    console.error(`Failed to cache response for HTTP ${request.method} ${request.url}`);
+                    console.error(err);
+                });
+        }
+
         return responseFromNetwork;
     }
     catch (err) {
