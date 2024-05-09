@@ -26,3 +26,10 @@ Enable "Update on reload" in the "Application -> Service workers" section of dev
 
 You might have to hold down on the refresh button in the browser and choose "Empty Cache and Hard Reload" to actually make the page and the service worker reload.
 
+## Resources
+
+- https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
+- https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers#the_premise_of_service_workers
+- https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/respondWith
+- https://css-tricks.com/add-a-service-worker-to-your-site/
+- https://www.chromium.org/blink/serviceworker/service-worker-faq/
