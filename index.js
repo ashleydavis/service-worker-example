@@ -10,3 +10,17 @@ if (navigator && navigator.serviceWorker) {
             console.error(err);
         });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log(`Fetching data...`);
+    fetch('https://jsonplaceholder.typicode.com/posts')
+        .then(response => response.json())
+        .then(data => {
+            console.log(`Retreived JSON data:`);
+            console.log(data);
+        })
+        .catch(err => {
+            console.error(`Failed to fetch JSON data:`);
+            console.error(err);
+        });
+});
