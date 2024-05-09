@@ -32,7 +32,12 @@ function preCache() {
 self.addEventListener("fetch", event => {
 
     console.log(`Service worker ${CACHE_NAME}`);
-    console.log(event);
+    console.log(`@@@@ Fetch for ${event.request.method} ${event.request.url}`);
+    console.log(event.request);
+    // console.log(`Request headers:`);
+    // for (const [key, value] of event.request.headers.entries()) {
+    //     console.log(`${key}: ${value}`);
+    // }
 
     // event.respondWith(cacheFirst(event.request));
 
@@ -46,7 +51,16 @@ async function cacheResponse(request, response) {
     const cache = await caches.open(CACHE_NAME);
     await cache.put(request, response);
 
-    console.log(`Cached response for HTTP ${request.method} ${request.url}`);
+    // console.log(`!! Response to ${request.url}:`); 
+    // console.log(response);
+    // console.log(`== ${response.headers.get("Content-Type")}`);
+
+    // console.log("Response headers:");
+    // for (const [key, value] of response.headers.entries()) {
+    //     console.log(`${key}: ${value}`);
+    // }
+
+    console.log(`✔ Cached response for HTTP ${request.method} ${request.url}`);
 };
 
 //
@@ -97,6 +111,30 @@ async function cacheFirst(request) {
 };
 
 //
+// The types of assets that can be cached.
+//
+const cachableContentTypes = [
+    "text/html",
+    "text/css",
+    "application/javascript",
+];
+
+//
+// Checks if the content type is cacheable.
+//
+function isCacheable(contentType) {
+    for (const cachableContentType of cachableContentTypes) {
+        if (contentType.includes(cachableContentType)) {
+            console.log(`## Cacheable content type: ${contentType}`);
+            return true;
+        }
+    }
+
+    console.log(`## Not cacheable content type: ${contentType}`);
+    return false;
+}
+
+//
 // Fetch using a network-first strategy.
 //
 async function networkFirst(request) {
@@ -107,18 +145,32 @@ async function networkFirst(request) {
         console.log(`>> HTTP ${request.method} ${request.url} from network.`);
         const responseFromNetwork = await fetch(request);
 
-        if (request.url.startsWith("http://") || request.url.startsWith("https://")) {
+        console.log(`<< Response to ${request.url}:`); 
+        console.log(responseFromNetwork);
+        console.log(`== ${responseFromNetwork.headers.get("Content-Type")}`);
 
-            //
-            // Cache the response.
-            //
-            // Cloning the response is necessary because request and response streams can only be read once.
-            //
-            cacheResponse(request, responseFromNetwork.clone())
-                .catch(err => {
-                    console.error(`Failed to cache response for HTTP ${request.method} ${request.url}`);
-                    console.error(err);
-                });
+        // console.log("Response headers:");
+        // for (const [key, value] of responseFromNetwork.headers.entries()) {
+        //     console.log(`${key}: ${value}`);
+        // }
+
+        if (request.url.startsWith("http://") || request.url.startsWith("https://")) {
+            const contentType = responseFromNetwork.headers.get("Content-Type");
+            if (contentType && isCacheable(contentType)) {
+                //
+                // Cache the response.
+                //
+                // Cloning the response is necessary because request and response streams can only be read once.
+                //
+                cacheResponse(request, responseFromNetwork.clone())
+                    .catch(err => {
+                        console.error(`Failed to cache response for HTTP ${request.method} ${request.url}`);
+                        console.error(err);
+                    });
+            }
+            else {
+                console.log(`!! Not caching request with response type ${contentType}`);
+            }
         }
 
         return responseFromNetwork;
