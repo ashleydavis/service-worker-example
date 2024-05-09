@@ -36,29 +36,43 @@ async function cacheResponse(request, response) {
 // Fetch using a cache-first strategy.
 //
 async function cacheFirst(request) {
-    const responseFromCache = await caches.match(request);
-    if (responseFromCache) {
+    try {
+        const responseFromCache = await caches.match(request);
+        if (responseFromCache) {
+            //
+            // Request is satsified from the cache.
+            //
+            return responseFromCache;
+        }
+    
         //
-        // Request is satsified from the cache.
+        // Request is not in the cache. Fetch it from the network.
         //
-        return responseFromCache;
+        console.log(`>> HTTP ${request.method} ${request.url} from network.`);
+        const responseFromNetwork = await fetch(request);
+    
+        //
+        // Cache the response.
+        //
+        // Cloning the response is necessary because request and response streams can only be read once.
+        //
+        cacheResponse(request, responseFromNetwork.clone())
+            .catch(err => {
+                console.error(`Failed to cache response for HTTP ${request.method} ${request.url}`);
+                console.error(err);
+            });
+        return responseFromNetwork;
     }
-
-    //
-    // Request is not in the cache. Fetch it from the network.
-    //
-    console.log(`>> HTTP ${request.method} ${request.url} from network.`);
-    const responseFromNetwork = await fetch(request);
-
-    //
-    // Cache the response.
-    //
-    cacheResponse(request, responseFromNetwork.clone())
-        .catch(err => {
-            console.error(`Failed to cache response for HTTP ${request.method} ${request.url}`);
-            console.error(err);
+    catch (err) {
+        //
+        // There is nothing in the cache and a network error happened.
+        //
+        const message = `An error happened while fetching HTTP ${request.method} ${request.url}]\r\n${err}`;
+        return new Response(message, {
+            status: 408,
+            headers: { "Content-Type": "text/plain" },
         });
-    return responseFromNetwork;
+    }
 };
 
 //
